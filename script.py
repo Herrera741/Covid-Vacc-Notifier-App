@@ -9,7 +9,6 @@ load_dotenv()
 #==========GLOBAL VARIABLES==========#
 TXT_API_KEY = os.environ.get('TXTBELT_API_KEY')
 PHONE_NUM = os.environ.get('CELL_NUM')
-DRIVER_PATH = os.environ.get('CHROME_DRIVER')
 START_URL = "https://myturn.ca.gov/"
 TEXTBELT_URL = "https://textbelt.com/text"
 COUNTY = 'Los Angeles'
@@ -21,18 +20,25 @@ SHORT_PAUSE = 2
 LONGER_PAUSE = 3
 
 def get_driver():
-    return webdriver.Chrome(DRIVER_PATH)
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
+
+def launch_page(chrome_driver):
+    return chrome_driver.get(START_URL)
 
 #==========MAIN FUNCTION==========#
 def check_availability(CHECKSUM=0):
     chrome_driver = get_driver()
     CHECKSUM += 1
     sleep(SHORT_PAUSE)
-    
     chrome_driver.maximize_window() # open new browser
     
     #...START PAGE
-    chrome_driver.get(START_URL)
+    launch_page(chrome_driver)
     browser_title_text = 'CDPH'
     assert browser_title_text in chrome_driver.title
     sleep(LONGER_PAUSE)
