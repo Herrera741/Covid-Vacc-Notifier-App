@@ -3,7 +3,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from time import sleep
 from dotenv import load_dotenv
-import requests, os
+import requests, os, codecs
 load_dotenv()
 
 #==========GLOBAL VARIABLES==========#
@@ -24,8 +24,9 @@ def get_driver():
     return webdriver.Chrome(DRIVER_PATH)
 
 #==========MAIN FUNCTION==========#
-def check_availability():
+def check_availability(CHECKSUM=0):
     chrome_driver = get_driver()
+    CHECKSUM += 1
     sleep(SHORT_PAUSE)
     
     chrome_driver.maximize_window() # open new browser
@@ -39,6 +40,7 @@ def check_availability():
     elem_tag_name = 'button'
     title_btn = chrome_driver.find_element_by_tag_name(elem_tag_name)
     title_btn.click()
+    CHECKSUM += 1
     sleep(SHORT_PAUSE)
     
     #...SCREENING PAGE
@@ -62,6 +64,7 @@ def check_availability():
     
     xpath = "//button[@type='submit']"
     chrome_driver.find_element_by_xpath(xpath).click()
+    CHECKSUM += 1
     sleep(LONGER_PAUSE)
     
     #...LOCATION SEARCH PAGE
@@ -70,6 +73,7 @@ def check_availability():
     location_elem.send_keys(ZIPCODE)
     xpath = "//button[text()='Continue']"
     chrome_driver.find_element_by_xpath(xpath).click()
+    CHECKSUM += 1
     sleep(LONGER_PAUSE)
     
     #...LOCATION SELECT PAGE
@@ -77,11 +81,13 @@ def check_availability():
     locations_btn_list = chrome_driver.find_elements_by_tag_name(elem_tag_name)
     print("location list contains {} locations".format(len(locations_btn_list)))
     locations_btn_list[len(locations_btn_list)-1].click()
+    CHECKSUM += 1
     sleep(LONGER_PAUSE)
     
     #...APPOINTMENT SELECT PAGE
     elem_css_selector = 'h3'
     if chrome_driver.find_elements_by_css_selector(elem_css_selector):
+        CHECKSUM += 1
         elem_property = "innerHTML"
         appts_avail_text = chrome_driver.find_element_by_tag_name(elem_css_selector).get_property(elem_property)
         num_appts = int(appts_avail_text[0]) # appointments number count
@@ -99,9 +105,14 @@ def check_availability():
                 }
             )
             print(HIT_RESPONSE)
-            sleep(LONGER_PAUSE)
-    else:
-        print(MISS_RESPONSE)
+            CHECKSUM += 1
+        else:
+            print(MISS_RESPONSE)
+            CHECKSUM += 1
+        sleep(LONGER_PAUSE)
+    
+    print("CHECKSUM is {}".format(CHECKSUM))
+    assert CHECKSUM >= 5
     
     chrome_driver.close()
     
