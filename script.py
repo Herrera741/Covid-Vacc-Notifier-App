@@ -1,11 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select, WebDriverWait
-from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
 from time import sleep
-from dotenv import load_dotenv
-import requests, os, codecs, itertools
-load_dotenv()
+import requests, os, itertools
 
 #==========GLOBAL VARIABLES==========#
 TXT_API_KEY = os.environ.get('TXTBELT_API_KEY')
@@ -22,8 +19,13 @@ LONG_PAUSE = 3
 LONGER_PAUSE = 7
 
 def get_driver():
-    chrome_driver = webdriver.Chrome()
-    return chrome_driver
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
+    return driver
 
 def launch_page(chrome_driver):
     return chrome_driver.get(START_URL)
