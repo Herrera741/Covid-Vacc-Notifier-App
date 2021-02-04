@@ -85,9 +85,9 @@ def check_availability(CHECKSUM=0):
     #...LOCATION SELECT PAGE
     elem_css_selector = "h2.tw-text-n800.tw-text-xl"
     dose_num_list = None
-    if "No appointments" in chrome_driver.find_elements_by_css_selector(elem_css_selector).text:
+    if "No appointments" in chrome_driver.find_elements_by_css_selector(elem_css_selector)[0].text:
         curr_datetime = datetime.now()
-        print("Still no appointments. Currently: " + curr_datetime.strftime("%Y-%m-%d %H:%M:%S"))
+        print("\nStill no appointments.\nCurrently: {}\n".format(curr_datetime.strftime("%Y-%m-%d %H:%M:%S")))
     else:
         message = "Appointments opened up." + chrome_driver.current_url
         resp = requests.post(
@@ -97,7 +97,8 @@ def check_availability(CHECKSUM=0):
                 'key': TXT_API_KEY,
             }
         )
-    chrome_driver.close()
+        sleep(LONGER_PAUSE)
+    chrome_driver.quit()
         
     #     dose_num_list = chrome_driver.find_elements_by_css_selector(elem_css_selector)
     #     print("vacc list contains {} vaccs".format(len(dose_num_list)))
