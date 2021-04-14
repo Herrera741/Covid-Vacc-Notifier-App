@@ -3,31 +3,25 @@ from selenium.webdriver.support.ui import Select
 from datetime import datetime
 from time import sleep
 import requests, os, itertools
+from dotenv import load_dotenv
+load_dotenv()
 
-#==========ENV VARIABLES==========#
-op = webdriver.ChromeOptions()
-op.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-op.add_argument("--headless")
-op.add_argument("--no-sandbox")
-op.add_argument("--disable-dev-sh-usage")
-TXT_API_KEY = os.environ.get('TXTBELT_API_KEY')
-PHONE_NUM = os.environ.get('CELL_NUM')
-
+#==========GLOBAL VARIABLES==========#
+TXT_API_KEY = os.getenv('TXTBELT_API_KEY')
+PHONE_NUM = os.getenv('CELL_NUM')
+DRIVER_PATH = "D:/Selenium-Drivers/Chrome-Driver/chromedriver_win32/chromedriver.exe"
 START_URL = "https://myturn.ca.gov/"
 TEXTBELT_URL = "https://textbelt.com/text"
 
-HIT_RESPONSE = "Found appointment(s) available."
-MISS_RESPONSE = "Sorry, no appointments yet."
+HIT_RESPONSE = "Found appointment(s) available. Text notification sent."
+MISS_RESPONSE = "no appointments yet"
 
 SHORT_PAUSE = 2
 LONG_PAUSE = 3
 LONGER_PAUSE = 7
 
-answerNO = "No"
-answerYES = "Yes"
-
 def get_driver():
-    return webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=op)
+    return webdriver.Chrome(DRIVER_PATH)
 
 def launch_page(chrome_driver):
     return chrome_driver.get(START_URL)
@@ -69,10 +63,12 @@ def check_availability(flagChecker=0):
     ageSelect = "//input[@name='q-screening-eligibility-age-range'][@value='{}']".format(ageRange)
     chrome_driver.find_element_by_xpath(ageSelect).click()
     
-    underlyingHealthSelect = "//input[@name='q-screening-underlying-health-condition'][@value='{}']".format(answerNO)
+    answerNo = "No"
+    underlyingHealthSelect = "//input[@name='q-screening-underlying-health-condition'][@value='{}']".format(answerNo)
     chrome_driver.find_element_by_xpath(underlyingHealthSelect).click()
     
-    disabilitySelect = "//input[@name='q-screening-disability'][@value='{}']".format(answerNO)
+    answerYes = "Yes"
+    disabilitySelect = "//input[@name='q-screening-disability'][@value='{}']".format(answerYes)
     chrome_driver.find_element_by_xpath(disabilitySelect).click()
     
     industrySelect = "q-screening-eligibility-industry"
@@ -80,16 +76,10 @@ def check_availability(flagChecker=0):
     selectIndustryOption = Select(chrome_driver.find_element_by_id(industrySelect))
     selectIndustryOption.select_by_visible_text(optionOther)
     
-    homelessSelect = "//input[@name='q-screening-homeless'][@value='{}']".format(answerNO)
-    chrome_driver.find_element_by_xpath(homelessSelect).click()
-    
     countySelect = "q-screening-eligibility-county"
     countyOption = "Los Angeles"
     selectCountyOption = Select(chrome_driver.find_element_by_id(countySelect))
     selectCountyOption.select_by_visible_text(countyOption)
-    
-    diffCountySelect = "//input[@name='q-screening-different-county'][@value='{}']".format(answerNO)
-    chrome_driver.find_element_by_xpath(diffCountySelect).click()
     
     submitBtn = "//button[@type='submit']"
     chrome_driver.find_element_by_xpath(submitBtn).click()
@@ -112,59 +102,47 @@ def check_availability(flagChecker=0):
     resultSelector = "div.tw-border-n200"
     if chrome_driver.find_elements_by_css_selector(resultSelector):
         
-        preferredCity = "mega pod lacoe/downey"
-        # nonPrefVONS = "vons"
-        # nonPrefSAVON = "sav-on"
-        # nonPrefMEDICAL = "medical"
+        preferredCity = "downey"
         preferredVacc = "pfizer"
-        preferredGroup = "all eligible groups"
-        resultsSelector = "h2.tw-text-n800"
+        titleSelector = "h2.tw-text-n800"
+        preferredLocations = {}
         locationSelector = "div.tw-text-n700"
-        resultsBatch = chrome_driver.find_elements_by_css_selector(resultsSelector)
-        
-        apptBtns = chrome_driver.find_elements_by_css_selector("button.tw-w-full")
-        apptsBackBtn = chrome_driver.find_element_by_css_selector("button.tw-py-4")
-        
-        preferredList = []
         locationList = []
+        titles = chrome_driver.find_elements_by_css_selector(titleSelector)
+        buttons = chrome_driver.find_elements_by_css_selector("button.tw-w-full")
         
-        results = []
-        for result in resultsBatch:
-            results.append(result.text)
-        
-        print('='*5, "results before filtering: ", len(results), '='*5)
-        
-        for index, result in enumerate(results):
-            titleText = result.lower()
-            if (preferredGroup in titleText and preferredVacc in titleText):
-                preferredList.append(result)
-               
-               
-        # print("results after filtering: ", len(results))
-        # print(results)                
-        print('='*5, "preferred list after filtering: ", len(preferredList), '='*5)
-        print(preferredList)
+        sleep(SHORT_PAUSE)
+        nonPreferredLocationFound = False
+        for index, title in enumerate(titles):
+            titleText = title.text.lower()
+            if (preferredVacc in titleText) and (preferredCity in titleText):
+                preferredLocations[index] = titleText
                 
-        # apptBtns[0].click()
-        # sleep(LONGER_PAUSE)
-        # apptsBackBtn.click()
-        # sleep(SHORT_PAUSE)        
-               
-        if len(preferredList) > 0:
+        
                 
-            message = HIT_RESPONSE + chrome_driver.current_url
-            resp = requests.post(
-                TEXTBELT_URL, {
-                    'phone': PHONE_NUM,
-                    'message': message,
-                    'key': TXT_API_KEY+'_test',
-                }
-            )
-            print("Message sent at {}. \nMessage response: {}".format(datetime.now(), resp.json()))
-    else:
-        print(MISS_RESPONSE)
-                  
+                
+        # if len(titleList) > 0:
+        #     for index, location in preferredLocations.items():
+                
+             
+             
+             
+            # message = "Appointments in Downey found. " + chrome_driver.current_url
+            # resp = requests.post(
+            #     TEXTBELT_URL, {
+            #         'phone': PHONE_NUM,
+            #         'message': message,
+            #         'key': TXT_API_KEY,
+            #     }
+            # )
+            # print(resp.json())
+            
+            
     flagChecker += 1
+
+    # else:
+    #     curr_datetime = datetime.now()
+    #     print("\nNo appointments available.\nTimestamp is {}\n".format(curr_datetime.strftime("%Y-%m-%d %H:%M:%S")))
     
     print("flagChecker count is {}".format(flagChecker))
     sleep(LONG_PAUSE)
