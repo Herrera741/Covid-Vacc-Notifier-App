@@ -44,7 +44,7 @@ def check_availability(flagChecker=0):
     sleep(LONG_PAUSE)
     
     btnTag = 'button'
-    checkEligibilityBtn = chrome_driver.find_element_by_tag_name(btnTag)
+    checkEligibilityBtn = chrome_driver.find_element_by_css_selector(btnTag)
     checkEligibilityBtn.click()
     flagChecker += 1
     sleep(SHORT_PAUSE)
