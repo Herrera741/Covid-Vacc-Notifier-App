@@ -41,7 +41,7 @@ def check_availability(flagChecker=0):
     
     #...START PAGE
     launch_page(chrome_driver)
-    browser_title_text = 'My Turn'
+    browser_title_text = 'myturn'
     assert browser_title_text in chrome_driver.title
     sleep(LONG_PAUSE)
     
