@@ -41,8 +41,6 @@ def check_availability(flagChecker=0):
     
     #...START PAGE
     launch_page(chrome_driver)
-    browser_title_text = 'myturn'
-    assert browser_title_text in chrome_driver.title
     sleep(LONG_PAUSE)
     
     btnTag = 'button'
@@ -52,8 +50,6 @@ def check_availability(flagChecker=0):
     sleep(SHORT_PAUSE)
     
     #...SCREENING PAGE
-    browser_title_text = 'Screening'
-    assert browser_title_text in chrome_driver.title
     sleep(LONG_PAUSE)
     
     checkBoxAge = "q-screening-18-yr-of-age"
