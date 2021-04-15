@@ -29,9 +29,6 @@ answerYES = "Yes"
 def get_driver():
     return webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=op)
 
-def launch_page(chrome_driver):
-    return chrome_driver.get(START_URL)
-
 #==========MAIN FUNCTION==========#
 def check_availability(flagChecker=0):
     chrome_driver = get_driver()
@@ -40,7 +37,7 @@ def check_availability(flagChecker=0):
     chrome_driver.maximize_window() # open new browser
     
     #...START PAGE
-    launch_page(chrome_driver)
+    chrome_driver.get(START_URL)
     sleep(LONG_PAUSE)
     
     btnTag = 'button'
